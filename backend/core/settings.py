@@ -144,3 +144,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication', # ⚡️ Enforces token generation readings
     ],
 }
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://bike-museum-production.up.railway.app',
+]
