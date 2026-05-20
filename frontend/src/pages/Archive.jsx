@@ -30,7 +30,6 @@ export default function Archive({
           margin: 0 auto;
         }
 
-        /* The outer rounded pill container */
         .filter-pill-bar {
           display: flex;
           align-items: center;
@@ -47,7 +46,6 @@ export default function Archive({
           flex-wrap: wrap;
         }
 
-        /* Divider between selects */
         .filter-divider {
           width: 1px;
           height: 28px;
@@ -55,7 +53,6 @@ export default function Archive({
           flex-shrink: 0;
         }
 
-        /* Individual select pill */
         .filter-select {
           flex: 1;
           min-width: 140px;
@@ -70,7 +67,6 @@ export default function Archive({
           color: var(--text-primary);
           padding: 6px 28px 6px 10px;
           cursor: pointer;
-          /* Custom chevron */
           background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7' viewBox='0 0 11 7'%3E%3Cpath d='M1 1l4.5 4.5L10 1' stroke='rgba(0,0,0,0.35)' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
           background-repeat: no-repeat;
           background-position: right 8px center;
@@ -79,7 +75,6 @@ export default function Archive({
         .filter-select:focus { color: #1a4fff; }
         .filter-select option { background: #fff; color: #111; }
 
-        /* BHP slider inline section */
         .filter-bhp-section {
           flex: 1;
           min-width: 160px;
@@ -117,7 +112,6 @@ export default function Archive({
           text-align: right;
         }
 
-        /* Reset pill button */
         .filter-reset-btn {
           flex-shrink: 0;
           display: flex;
@@ -148,7 +142,6 @@ export default function Archive({
           background: rgba(26,111,255,0.14);
         }
 
-        /* Status bar below filter pill */
         .filter-status-bar {
           display: flex;
           justify-content: space-between;
@@ -234,7 +227,6 @@ export default function Archive({
       {/* ── MARKETPLACE ─────────────────────────────────────────────── */}
       {activeTab === 'marketplace' && (
         <>
-          {/* Sticky horizontal filter pill bar */}
           <div className="filter-bar-wrapper">
             <div className="filter-pill-bar">
 
@@ -269,7 +261,7 @@ export default function Archive({
 
               <div className="filter-divider" />
 
-              {/* Inline BHP slider — matches sketch's third "dropdown" slot */}
+              {/* Inline BHP slider */}
               <div className="filter-bhp-section">
                 <span className="bhp-label">Min BHP</span>
                 <input
@@ -294,16 +286,16 @@ export default function Archive({
               </button>
             </div>
 
-            {/* Status row */}
+            {/* Status row — SAFEGUARDED HERE */}
             <div className="filter-status-bar">
               <span className="filter-status-label">Showroom Index · Live Directory</span>
               <span className="filter-status-count">
-                <span>{bikes.length}</span> records
+                <span>{bikes?.length || 0}</span> records
               </span>
             </div>
           </div>
 
-          {/* Card grid */}
+          {/* Card grid — SAFEGUARDED HERE */}
           <div className="archive-content">
             {errorMessage && <div className="error-banner" style={{ marginBottom: '20px' }}>{errorMessage}</div>}
             <div className="archive-grid">
@@ -311,7 +303,7 @@ export default function Archive({
                 <div className="archive-state-box">
                   <span className="loading-pulse">Querying Live Archive…</span>
                 </div>
-              ) : bikes.length === 0 ? (
+              ) : !bikes || bikes.length === 0 ? (
                 <div className="archive-state-box">
                   No vehicles match the current filters.
                 </div>
