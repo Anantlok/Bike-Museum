@@ -42,8 +42,8 @@ export default function Profile({ token, handleLogout }) {
     if (!token) { navigate('/login'); return; }
     const headers = { Authorization: `Token ${token}` };
     Promise.all([
-      axios.get('http://127.0.0.1:8000/api/user/profile/',  { headers }),
-      axios.get('http://127.0.0.1:8000/api/my-inventory/',  { headers })
+      axios.get('bike-museum-production.up.railway.app/api/user/profile/',  { headers }),
+      axios.get('bike-museum-production.up.railway.app/api/my-inventory/',  { headers })
         .catch(() => ({ data: [] })),
     ])
     .then(([profileRes, collectionRes]) => {

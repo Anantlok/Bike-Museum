@@ -184,7 +184,7 @@ export default function App() {
     if (selectedRarity) params.push(`rarity=${encodeURIComponent(selectedRarity)}`);
     if (minBhp)         params.push(`min_bhp=${encodeURIComponent(minBhp)}`);
 
-    const url = 'http://127.0.0.1:8000/api/marketplace/' + (params.length ? `?${params.join('&')}` : '');
+    const url = 'bike-museum-production.up.railway.app/api/marketplace/' + (params.length ? `?${params.join('&')}` : '');
 
     axios.get(url)
       .then(res  => { setBikes(res.data); setLoading(false); })

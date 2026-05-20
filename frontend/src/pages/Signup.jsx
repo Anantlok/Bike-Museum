@@ -12,7 +12,7 @@ export default function Signup() {
   const handleSignup = (e) => {
     e.preventDefault();
     // Fires registration payload matrix to your live running Django Views backend
-    axios.post('http://127.0.0.1:8000/api/auth/signup/', { username, email, password })
+    axios.post('bike-museum-production.up.railway.app/api/auth/signup/', { username, email, password })
       .then(() => {
         // Upon a successful database write, route the new collector to sign in
         navigate('/login');
