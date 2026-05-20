@@ -3,7 +3,7 @@ import axios from 'axios';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 
 // ── CORE SUBBOARD ROUTING ARCHIVE IMPORTS ──────────────────────────────────
-import Archive from './pages/archive';
+import Archive from './pages/Archive';
 import Home from './pages/Home';
 import Profile from './pages/Profile';
 import Login from './pages/Login';
