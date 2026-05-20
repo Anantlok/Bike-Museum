@@ -604,7 +604,7 @@ export default function App() {
 
           <div className={`tab-switcher glass ${isNavOpen ? 'mobile-dropdown-open' : ''}`}>
             <Link
-              to="/archive"
+              to="/Archive"
               onClick={() => { setActiveTab('marketplace'); setIsNavOpen(false); }}
               className={`nav-link-btn ${activeTab === 'marketplace' ? 'active' : ''}`}
             >
