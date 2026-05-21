@@ -115,7 +115,7 @@ export default function Home() {
 
   /* fetch bikes once */
   useEffect(() => {
-    axios.get('http://127.0.0.1:8000/api/marketplace/')
+    axios.get('https://bike-museum-production.up.railway.app/api/marketplace/')
       .then(res => {
         const shuffled = [...res.data].sort(() => Math.random() - 0.5);
         setBikes(shuffled.slice(0, Math.min(shuffled.length, 20)));
