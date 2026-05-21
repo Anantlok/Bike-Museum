@@ -13,7 +13,7 @@ function WelcomeCard({ isCenter, totalBikes }) {
     <div className={`card-inner welcome-card-inner ${isCenter ? 'is-center' : ''}`}>
       <div className="card-glare" />
 
-      <p className="wc-eyebrow">Indian Bike Archive · Est. 2026</p>
+      <p className="wc-eyebrow">Indian Bike Archive · Est. 2024</p>
 
       <h1 className="wc-title">
         Welcome<br />to the<br />Bike Museum
@@ -115,7 +115,7 @@ export default function Home() {
 
   /* fetch bikes once */
   useEffect(() => {
-    axios.get('https://bike-museum-production.up.railway.app/api/marketplace/')
+    axios.get('http://127.0.0.1:8000/api/marketplace/')
       .then(res => {
         const shuffled = [...res.data].sort(() => Math.random() - 0.5);
         setBikes(shuffled.slice(0, Math.min(shuffled.length, 20)));
@@ -243,7 +243,7 @@ export default function Home() {
           position: absolute;
           width: 330px;
           border-radius: 28px;
-          background: rgba(255,255,255,0.86);
+          background: rgba(255,255,255,0.56);
           border: 1px solid rgba(255,255,255,0.82);
           backdrop-filter: blur(34px) saturate(1.8);
           -webkit-backdrop-filter: blur(34px) saturate(1.8);
@@ -404,9 +404,9 @@ export default function Home() {
            WELCOME CARD INTERIOR
         ═══════════════════════════════════════════════════ */
         .welcome-card-inner {
-          padding: 32px 36px 28px;
+          padding: 28px 36px 24px;
           justify-content: space-between;
-          min-height: 340px;
+          min-height: 300px;
         }
 
         .wc-eyebrow {
@@ -771,20 +771,60 @@ export default function Home() {
            RESPONSIVE
         ═══════════════════════════════════════════════════ */
         @media (max-width: 720px) {
-          .home-root { height: calc(100vh - 56px); }
-          .gallery-card    { width: 278px; }
-          .gallery-card.pos-center  { width: 300px; }
-          .gallery-card.pos-left    { transform: translateX(-222px) translateZ(-40px) scale(0.84) rotateY(13deg); }
-          .gallery-card.pos-right   { transform: translateX(222px)  translateZ(-40px) scale(0.84) rotateY(-13deg); }
-          .gallery-card.pos-farleft  { opacity: 0; pointer-events: none; }
-          .gallery-card.pos-farright { opacity: 0; pointer-events: none; }
-          .gallery-arrow-left  { left:  2px; }
-          .gallery-arrow-right { right: 2px; }
-          .wc-title { font-size: 2.1rem; }
+          .home-root {
+            height: calc(100vh - 56px);
+            padding: 20px 16px 0;
+            justify-content: flex-start;
+            overflow-y: auto;
+          }
+
+          /* stage takes natural height, no flex:1 stretching */
+          .gallery-stage {
+            flex: none;
+            height: auto;
+            width: 100%;
+            padding: 8px 0 0;
+          }
+
+          /* all non-center cards vanish on mobile */
+          .gallery-card.pos-left,
+          .gallery-card.pos-right,
+          .gallery-card.pos-farleft,
+          .gallery-card.pos-farright {
+            opacity: 0 !important;
+            pointer-events: none !important;
+            transform: translateX(0) scale(0.8) !important;
+          }
+
+          /* center card fills the width */
+          .gallery-card.pos-center {
+            position: relative;      /* leave normal flow */
+            width: 100% !important;
+            max-width: 400px;
+            transform: none !important;
+            margin: 0 auto;
+          }
+
+          /* hide arrows — swipe handles nav on mobile */
+          .gallery-arrow { display: none; }
+
+          /* welcome card more compact */
+          .welcome-card-inner {
+            padding: 24px 24px 22px;
+            min-height: unset;
+          }
+          .wc-title { font-size: 2.0rem; }
+
+          /* bike card image smaller */
+          .card-inner.is-center .card-image-box { min-height: 140px; }
+
+          /* meta row tighter */
+          .gallery-meta { padding: 14px 0 16px; }
         }
 
         @media (max-width: 400px) {
-          .gallery-card.pos-center { width: 272px; }
+          .gallery-card.pos-center { max-width: 100%; }
+          .wc-title { font-size: 1.8rem; }
         }
       `}</style>
 

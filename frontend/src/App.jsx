@@ -2,15 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 
-// ── CORE SUBBOARD ROUTING ARCHIVE IMPORTS ──────────────────────────────────
-import Archive from './pages/Archive';
-import Home from './pages/Home';
-import Profile from './pages/Profile';
-import Login from './pages/Login';
-import Signup from './pages/Signup';
-
-// ⚡️ FIXED: ADDED THE MISSING IMPORT SO VITE CAN PROCESS THE DECK PLATFORM
+import Archive      from './pages/Archive';
+import Home         from './pages/Home';
+import Profile      from './pages/Profile';
+import Login        from './pages/Login';
+import Signup       from './pages/Signup';
 import OpenPacksPage from './pages/OpenPacksPage';
+
+const API = 'https://bike-museum-production.up.railway.app';
 
 function ProtectedRoute({ token, children }) {
   if (!token) return <Navigate to="/login" replace />;
@@ -18,19 +17,21 @@ function ProtectedRoute({ token, children }) {
 }
 
 export default function App() {
-  const [activeTab, setActiveTab]         = useState('marketplace');
-  const [bikes, setBikes]                 = useState([]);
-  const [selectedBrand, setSelectedBrand] = useState('');
+  // ── Marketplace filter state ────────────────────────────────────────────
+  const [bikes,          setBikes]          = useState([]);
+  const [selectedBrand,  setSelectedBrand]  = useState('');
   const [selectedRarity, setSelectedRarity] = useState('');
-  const [minBhp, setMinBhp]               = useState('');
-  const [loading, setLoading]             = useState(true);
-  const [errorMessage, setErrorMessage]   = useState('');
+  const [minBhp,         setMinBhp]         = useState('');
+  const [loading,        setLoading]        = useState(true);
+  const [errorMessage,   setErrorMessage]   = useState('');
 
-  const [openedBike, setOpenedBike]   = useState(null);
+  // ── Open Packs state ────────────────────────────────────────────────────
+  const [openedBike,  setOpenedBike]  = useState(null);
   const [openingPack, setOpeningPack] = useState(false);
-  const [gachaError, setGachaError]   = useState('');
+  const [gachaError,  setGachaError]  = useState('');
 
-  const [token, setToken]     = useState(localStorage.getItem('userToken') || '');
+  // ── Auth / nav state ────────────────────────────────────────────────────
+  const [token,     setToken]     = useState(localStorage.getItem('userToken') || '');
   const [isNavOpen, setIsNavOpen] = useState(false);
 
   // ── WebGL fluid ink background ──────────────────────────────────────────
@@ -59,7 +60,6 @@ export default function App() {
         gl_Position = vec4(a_pos, 0.0, 1.0);
       }
     `;
-
     const FS = `
       precision mediump float;
       varying vec2 v_uv;
@@ -70,7 +70,6 @@ export default function App() {
         p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));
         return -1.0 + 2.0 * fract(sin(p) * 43758.5453);
       }
-
       float noise(vec2 p) {
         vec2 i = floor(p), f = fract(p);
         vec2 u = f * f * (3.0 - 2.0 * f);
@@ -80,7 +79,6 @@ export default function App() {
         float d = dot(hash2(i + vec2(1,1)), f - vec2(1,1));
         return mix(mix(a,b,u.x), mix(c,d,u.x), u.y) * 0.5 + 0.5;
       }
-
       float fbm(vec2 p) {
         float v = 0.0, amp = 0.55, total = 0.0;
         v += amp * noise(p); total += amp; amp *= 0.46;
@@ -94,23 +92,19 @@ export default function App() {
         v += amp * noise(p); total += amp;
         return v / total;
       }
-
       float warpedNoise(vec2 uv, float t) {
         float s = t * 0.038;
         vec2 q = vec2(fbm(uv + vec2(0.00, 0.00) + s), fbm(uv + vec2(5.20, 1.30) + s));
         vec2 r = vec2(fbm(uv + 3.2*q + vec2(1.70, 9.20) + s*0.8), fbm(uv + 3.2*q + vec2(8.30, 2.80) + s*0.8));
         return fbm(uv + 3.8 * r + t * 0.016);
       }
-
       void main() {
         vec2 uv = v_uv;
         uv = (uv - 0.5) * vec2(u_res.x / u_res.y, 1.0) * 1.05 + 0.5;
-
         float f = warpedNoise(uv * 2.1, u_time);
         f = pow(f, 1.45);
         f = smoothstep(0.30, 0.70, f);
         f = smoothstep(0.12, 0.88, f);
-
         vec2 px = uv * u_res;
         float gx = fract(sin(dot(px + fract(u_time * 9.3),  vec2(12.9898, 78.233))) * 43758.5453);
         float gy = fract(sin(dot(px + fract(u_time * 7.7) + 31.4, vec2(93.9898, 67.345))) * 24751.1234);
@@ -118,7 +112,6 @@ export default function App() {
         float midBoost = 1.0 + 0.6 * (1.0 - abs(f * 2.0 - 1.0));
         f += (g - 0.5) * 0.055 * midBoost;
         f  = clamp(f, 0.0, 0.95);
-
         f = 1.0 - f;
         gl_FragColor = vec4(vec3(f), 1.0);
       }
@@ -175,7 +168,6 @@ export default function App() {
 
   // ── Marketplace data fetching ───────────────────────────────────────────
   useEffect(() => {
-    if (activeTab !== 'marketplace') return;
     setLoading(true);
     setErrorMessage('');
 
@@ -184,24 +176,27 @@ export default function App() {
     if (selectedRarity) params.push(`rarity=${encodeURIComponent(selectedRarity)}`);
     if (minBhp)         params.push(`min_bhp=${encodeURIComponent(minBhp)}`);
 
-    const url = 'https://bike-museum-production.up.railway.app/api/marketplace/' + (params.length ? `?${params.join('&')}` : '');
+    const url = `${API}/api/marketplace/` + (params.length ? `?${params.join('&')}` : '');
 
     axios.get(url)
       .then(res  => { setBikes(res.data); setLoading(false); })
       .catch(err => {
         console.error(err);
-        setErrorMessage('Failed to fetch data from Django backend. Ensure your Python server is running.');
+        setErrorMessage('Failed to fetch data. Please try again.');
         setLoading(false);
       });
-  }, [selectedBrand, selectedRarity, minBhp, activeTab]);
+  }, [selectedBrand, selectedRarity, minBhp]);
 
   // ── Gacha pack opener ───────────────────────────────────────────────────
   const handleOpenPack = () => {
     setOpeningPack(true);
     setGachaError('');
     setOpenedBike(null);
-    const config = { headers: { Authorization: `Token ${token}` } };
-    axios.post('https://bike-museum-production.up.railway.app/api/open-pack/', {}, config)
+    axios.post(
+      `${API}/api/open-pack/`,
+      {},
+      { headers: { Authorization: `Token ${token}` } }
+    )
       .then(res  => { setOpenedBike(res.data); setOpeningPack(false); })
       .catch(err => {
         setGachaError(err.response?.data?.error || 'Token verification failed or tokens exhausted.');
@@ -209,10 +204,10 @@ export default function App() {
       });
   };
 
+  // ── Logout ──────────────────────────────────────────────────────────────
   const handleLogout = () => {
     localStorage.removeItem('userToken');
     setToken('');
-    setActiveTab('marketplace');
     setIsNavOpen(false);
   };
 
@@ -220,7 +215,7 @@ export default function App() {
     <Router>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=Cabin:ital,wght@0,400..700;1,400..700&family=Funnel+Display:wght@300..800&family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cabin:ital,wght@0,400..700;1,400..700&family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap');
 
         @font-face {
           font-family: 'MyCustomHeader';
@@ -262,7 +257,6 @@ export default function App() {
           color: var(--text-primary);
         }
 
-        /* Grain overlay */
         #root::after {
           content: '';
           position: fixed;
@@ -277,12 +271,9 @@ export default function App() {
         #root { position: relative; z-index: 1; }
 
         #gradient-canvas {
-          position: fixed;
-          inset: 0;
-          width: 100%;
-          height: 100%;
-          z-index: 0;
-          pointer-events: none;
+          position: fixed; inset: 0;
+          width: 100%; height: 100%;
+          z-index: 0; pointer-events: none;
           image-rendering: auto;
         }
 
@@ -301,7 +292,7 @@ export default function App() {
           box-shadow: var(--glass-shadow-lg);
         }
 
-        /* ── Sticky frosted navbar ── */
+        /* ── Navbar ── */
         .frosted-header-container {
           position: sticky;
           top: 0;
@@ -313,7 +304,6 @@ export default function App() {
           border-bottom: 1px solid rgba(0,0,0,0.10);
           box-shadow: 0 4px 30px rgba(0,0,0,0.05), 0 1px 0 rgba(255,255,255,0.8) inset;
         }
-
         .header-inner-content {
           max-width: 1280px;
           margin: 0 auto;
@@ -326,7 +316,6 @@ export default function App() {
           min-height: 56px;
         }
 
-        /* ── Brand / home link ── */
         .header-brand {
           display: flex;
           align-items: baseline;
@@ -336,20 +325,14 @@ export default function App() {
           padding: 6px 10px;
           border-radius: 12px;
           margin: -6px -10px;
-          transition:
-            background  0.22s ease,
-            box-shadow  0.22s ease,
-            transform   0.22s cubic-bezier(0.34,1.1,0.64,1);
+          transition: background 0.22s ease, box-shadow 0.22s ease, transform 0.22s cubic-bezier(0.34,1.1,0.64,1);
         }
         .header-brand:hover {
           background: rgba(0,0,0,0.04);
           box-shadow: 0 2px 14px rgba(0,0,0,0.04);
           transform: translateY(-1px);
         }
-        .header-brand:active {
-          transform: translateY(0px) scale(0.98);
-          transition-duration: 0.10s;
-        }
+        .header-brand:active { transform: translateY(0) scale(0.98); transition-duration: 0.10s; }
 
         .header-title {
           font-family: var(--font-display);
@@ -373,14 +356,12 @@ export default function App() {
           opacity: 0.8;
         }
 
-        /* ── Nav links ── */
         .tab-switcher {
           display: flex;
           gap: 4px;
           padding: 4px;
           border-radius: 14px;
         }
-
         .nav-link-btn {
           padding: 8px 18px;
           border-radius: 10px;
@@ -404,7 +385,6 @@ export default function App() {
           box-shadow: 0 2px 16px rgba(26,111,255,0.10);
         }
 
-        /* ── Mobile hamburger ── */
         .mobile-nav-toggle {
           display: none;
           background: rgba(255,255,255,0.45);
@@ -426,13 +406,14 @@ export default function App() {
         }
         .mobile-nav-toggle:hover { background: rgba(255,255,255,0.65); }
 
+        /* ── Page wrappers ── */
         .app-wrapper {
           position: relative;
           z-index: 3;
           min-height: calc(100vh - 56px);
-          padding-top: 0;
         }
 
+        /* ── Shared utilities ── */
         .error-banner {
           background: rgba(200,30,30,0.08);
           border: 1px solid rgba(200,30,30,0.18);
@@ -444,10 +425,8 @@ export default function App() {
           backdrop-filter: blur(12px);
           letter-spacing: 0.01em;
         }
-
         .loading-pulse { animation: pulse 1.6s ease-in-out infinite; }
         @keyframes pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
-
         .state-box {
           display: flex;
           align-items: center;
@@ -460,44 +439,22 @@ export default function App() {
           letter-spacing: 0.04em;
         }
 
-        /* ── Gacha panel ── */
+        /* ── Gacha shared styles (used by OpenPacksPage) ── */
+        @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
         .gacha-panel {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          max-width: 420px;
-          margin: 0 auto;
-          padding: 48px 36px;
-          border-radius: 28px;
-          text-align: center;
+          display: flex; flex-direction: column; align-items: center;
+          justify-content: center; max-width: 420px; margin: 0 auto;
+          padding: 48px 36px; border-radius: 28px; text-align: center;
           animation: fadeUp 0.3s cubic-bezier(0.34,1.1,0.64,1);
         }
-        @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
-
-        .gacha-title {
-          font-family: var(--font-display);
-          font-size: 2rem;
-          font-weight: 400;
-          color: var(--text-primary);
-          margin-bottom: 8px;
-        }
-        .gacha-sub {
-          font-size: 13px;
-          color: var(--text-secondary);
-          margin-bottom: 36px;
-          font-weight: 300;
-          line-height: 1.6;
-        }
+        .gacha-title { font-family: var(--font-display); font-size: 2rem; font-weight: 400; color: var(--text-primary); margin-bottom: 8px; }
+        .gacha-sub   { font-size: 13px; color: var(--text-secondary); margin-bottom: 36px; font-weight: 300; line-height: 1.6; }
         .gacha-card-stage {
-          width: 260px; height: 340px;
-          border-radius: 22px;
+          width: 260px; height: 340px; border-radius: 22px;
           border: 1px solid var(--glass-border);
           background: rgba(255,255,255,0.45);
           display: flex; align-items: center; justify-content: center;
-          margin-bottom: 32px;
-          overflow: hidden;
-          backdrop-filter: blur(16px);
+          margin-bottom: 32px; overflow: hidden; backdrop-filter: blur(16px);
           box-shadow: 0 12px 40px rgba(0,0,0,0.10), 0 1px 0 rgba(255,255,255,0.9) inset;
         }
         .gacha-idle-icon { display:flex; flex-direction:column; align-items:center; gap:16px; }
@@ -505,16 +462,12 @@ export default function App() {
           width:100px; height:130px; border-radius:16px;
           background: linear-gradient(145deg, rgba(124,58,237,0.15), rgba(26,111,255,0.12));
           border: 1px solid rgba(124,58,237,0.2);
-          display:flex; align-items:center; justify-content:center;
-          font-size:44px;
+          display:flex; align-items:center; justify-content:center; font-size:44px;
           box-shadow: 0 8px 32px rgba(124,58,237,0.10);
         }
         .gacha-pack-visual.bouncing { animation: bounce 0.7s ease infinite alternate; }
         @keyframes bounce { from{transform:translateY(0) scale(1)} to{transform:translateY(-8px) scale(1.04)} }
-        .gacha-pack-label {
-          font-size:10px; letter-spacing:0.2em; text-transform:uppercase;
-          color:var(--text-tertiary); font-weight:700;
-        }
+        .gacha-pack-label { font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--text-tertiary); font-weight:700; }
         .gacha-result-appear { animation: scaleUp 0.4s cubic-bezier(0.34,1.56,0.64,1); }
         @keyframes scaleUp { from{transform:scale(0.75);opacity:0} to{transform:scale(1);opacity:1} }
         .gacha-error {
@@ -522,7 +475,6 @@ export default function App() {
           color: rgba(160,20,20,0.9); padding:12px 16px; border-radius:var(--radius-xs);
           font-size:12px; font-weight:600; margin-bottom:20px; width:100%;
         }
-
         .cta-btn {
           width:100%; padding:15px 24px; border-radius:14px;
           font-family:var(--font-body); font-size:14px; font-weight:700;
@@ -530,15 +482,11 @@ export default function App() {
           transition: all 0.22s cubic-bezier(0.34,1.1,0.64,1);
           position:relative; overflow:hidden;
         }
-        .cta-btn::before {
-          content:''; position:absolute; inset:0;
-          background:rgba(0,0,0,0.06); opacity:0; transition:opacity 0.18s;
-        }
+        .cta-btn::before { content:''; position:absolute; inset:0; background:rgba(0,0,0,0.06); opacity:0; transition:opacity 0.18s; }
         .cta-btn:hover::before { opacity:1; }
         .cta-btn-gacha {
           background: linear-gradient(135deg, rgba(124,58,237,0.18) 0%, rgba(26,111,255,0.16) 100%);
-          border: 1px solid rgba(124,58,237,0.25);
-          color: #4c1d95;
+          border: 1px solid rgba(124,58,237,0.25); color: #4c1d95;
           box-shadow: 0 4px 24px rgba(124,58,237,0.10), 0 1px 0 rgba(255,255,255,0.8) inset;
         }
         .cta-btn:disabled { opacity:0.35; cursor:not-allowed; }
@@ -547,7 +495,6 @@ export default function App() {
         @media (max-width: 789px) {
           .mobile-nav-toggle { display: block; }
           .header-side-tagline { display: none; }
-
           .tab-switcher {
             display: none;
             position: absolute;
@@ -571,12 +518,10 @@ export default function App() {
           .gacha-title { font-size: 1.8rem; }
           .gacha-card-stage { width: 100%; }
         }
-
         @keyframes dropdownSlide {
           from { opacity:0; transform:scale(0.95) translateY(-8px); }
           to   { opacity:1; transform:scale(1)    translateY(0);     }
         }
-
         @media (max-width: 400px) {
           .gacha-card-stage { height: 300px; }
         }
@@ -588,12 +533,7 @@ export default function App() {
       <nav className="frosted-header-container">
         <div className="header-inner-content">
 
-          {/* Brand → home link */}
-          <Link
-            to="/"
-            className="header-brand"
-            onClick={() => setIsNavOpen(false)}
-          >
+          <Link to="/" className="header-brand" onClick={() => setIsNavOpen(false)}>
             <h1 className="header-title">Indian Bike Museum</h1>
             <p className="header-side-tagline">— Explore, filter &amp; roll randomized vehicle drops.</p>
           </Link>
@@ -604,30 +544,31 @@ export default function App() {
 
           <div className={`tab-switcher glass ${isNavOpen ? 'mobile-dropdown-open' : ''}`}>
             <Link
-              to="/Archive"
-              onClick={() => { setActiveTab('marketplace'); setIsNavOpen(false); }}
-              className={`nav-link-btn ${activeTab === 'marketplace' ? 'active' : ''}`}
+              to="/archive"
+              onClick={() => setIsNavOpen(false)}
+              className="nav-link-btn"
             >
               Marketplace
             </Link>
-            
             <Link
               to="/open-packs"
-              onClick={() => { setActiveTab('gacha'); setIsNavOpen(false); }}
-              className={`nav-link-btn ${activeTab === 'gacha' ? 'active' : ''}`}
+              onClick={() => setIsNavOpen(false)}
+              className="nav-link-btn"
             >
               Open Packs
             </Link>
-            
-            <Link to="/profile" onClick={() => setIsNavOpen(false)} className="nav-link-btn">
+            <Link
+              to="/profile"
+              onClick={() => setIsNavOpen(false)}
+              className="nav-link-btn"
+            >
               My Profile
             </Link>
-            {!token && (
+            {!token ? (
               <Link to="/login" onClick={() => setIsNavOpen(false)} className="nav-link-btn">
                 Login
               </Link>
-            )}
-            {token && (
+            ) : (
               <button onClick={handleLogout} className="nav-link-btn">
                 Logout
               </button>
@@ -640,12 +581,11 @@ export default function App() {
       <div className="app-wrapper">
         <Routes>
           <Route path="/" element={<Home />} />
+
           <Route
             path="/archive"
             element={
               <Archive
-                activeTab={activeTab}
-                setActiveTab={setActiveTab}
                 bikes={bikes}
                 loading={loading}
                 errorMessage={errorMessage}
@@ -655,13 +595,13 @@ export default function App() {
               />
             }
           />
-          
+
           <Route
             path="/open-packs"
-            element = {
+            element={
               <ProtectedRoute token={token}>
-                <OpenPacksPage 
-                  token={token} 
+                <OpenPacksPage
+                  token={token}
                   openedBike={openedBike}
                   setOpenedBike={setOpenedBike}
                   openingPack={openingPack}
@@ -673,7 +613,7 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-          
+
           <Route
             path="/profile"
             element={
@@ -682,9 +622,10 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
           <Route path="/login"  element={<Login  setToken={setToken} />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*"       element={<Navigate to="/" replace />} />
         </Routes>
       </div>
     </Router>
