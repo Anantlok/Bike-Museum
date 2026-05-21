@@ -11,7 +11,7 @@ export default function Login({ setToken }) {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    axios.post('bike-museum-production.up.railway.app/api/auth/login/', { username, password })
+    axios.post('https://bike-museum-production.up.railway.app/api/auth/login/', { username, password })
       .then(res => {
         const token = res.data.token;
         localStorage.setItem('userToken', token);

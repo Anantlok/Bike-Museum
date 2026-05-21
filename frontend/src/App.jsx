@@ -184,7 +184,7 @@ export default function App() {
     if (selectedRarity) params.push(`rarity=${encodeURIComponent(selectedRarity)}`);
     if (minBhp)         params.push(`min_bhp=${encodeURIComponent(minBhp)}`);
 
-    const url = 'bike-museum-production.up.railway.app/api/marketplace/' + (params.length ? `?${params.join('&')}` : '');
+    const url = 'https://bike-museum-production.up.railway.app/api/marketplace/' + (params.length ? `?${params.join('&')}` : '');
 
     axios.get(url)
       .then(res  => { setBikes(res.data); setLoading(false); })
@@ -201,7 +201,7 @@ export default function App() {
     setGachaError('');
     setOpenedBike(null);
     const config = { headers: { Authorization: `Token ${token}` } };
-    axios.post('http://127.0.0.1:8000/api/open-pack/', {}, config)
+    axios.post('https://bike-museum-production.up.railway.app/api/open-pack/', {}, config)
       .then(res  => { setOpenedBike(res.data); setOpeningPack(false); })
       .catch(err => {
         setGachaError(err.response?.data?.error || 'Token verification failed or tokens exhausted.');

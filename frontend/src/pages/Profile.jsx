@@ -42,7 +42,7 @@ export default function Profile({ token, handleLogout }) {
     if (!token) { navigate('/login'); return; }
     const headers = { Authorization: `Token ${token}` };
     Promise.all([
-      axios.get('bike-museum-production.up.railway.app/api/user/profile/',  { headers }),
+      axios.get('https://bike-museum-production.up.railway.app/api/user/profile/',  { headers }),
       axios.get('bike-museum-production.up.railway.app/api/my-inventory/',  { headers })
         .catch(() => ({ data: [] })),
     ])
