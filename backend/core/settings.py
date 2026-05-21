@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-2m1qq7%)ws^_nfq^huyz_kj!c46!(n+7^a29zf3#4ybc-rdq%s
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -45,7 +45,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # Must remain at the top
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -94,8 +94,6 @@ else:
         }
     }
 
-ALLOWED_HOSTS = ['*']
-
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
@@ -133,18 +131,20 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-# Allow the Vite dev server (different origin) to call the API from the browser
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
-]
+
+# ── 🎯 PRODUCTION CORS & CSRF TRUSTED CONFIGURATIONS ───────────────────────
+# Grants permissions for your hosted React application to fetch cloud data
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication', # ⚡️ Enforces token generation readings
+        'rest_framework.authentication.TokenAuthentication',
     ],
 }
 
+# Trust validation for both the admin panel domain and the live user interface site
 CSRF_TRUSTED_ORIGINS = [
     'https://bike-museum-production.up.railway.app',
+    'https://pleasant-gentleness-production-e5ad.up.railway.app',
 ]
