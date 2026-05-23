@@ -1,4 +1,4 @@
-### Bike Museum
+# Bike Museum
 A bike archival web application built with gacha and login/signup functionality
 
 ## 🛠️ Installation
