@@ -2,14 +2,14 @@
 A bike archival web application built with gacha and login/signup functionality
 
 ## 🛠️ Installation
--download the files
--change the urls in the react app page and components to https://127.0.0.1
--create a python venv and install django, rest framework by pip install -r requirements.txt
--create a .env file to save db passwords name and ports
--make superusers, migrations 
--run npm install in the frontend folder
--create an env file to connect the servwer
--run the backend server and the frontend server\
+- download the files
+- change the urls in the react app page and components to https://127.0.0.1
+- create a python venv and install django, rest framework by pip install -r requirements.txt
+- create a .env file to save db passwords name and ports
+- make superusers, migrations 
+- run ''' npm install ''' in the frontend folder
+- create an env file to connect the servwer
+- run the backend server and the frontend server\
 
 ## Image References 
 - Home Page
